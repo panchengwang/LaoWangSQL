@@ -1,7 +1,8 @@
 # contrib/laowangsql/Makefile
 
 MODULE_big = laowangsql
-OBJS = map.o
+OBJS = 	map.o \
+		canvas.o
 
 EXTENSION = laowangsql
 DATA = laowangsql--1.0.sql
@@ -20,25 +21,22 @@ PG_CPPFLAGS = \
 	-I$(POSTGIS_PATH)/liblwgeom \
 	-I../../src/backend \
 	-I$(shell pg_config --includedir) \
-	$(shell sfcgal-config --cflags) \
-	$(shell geos-config --cflags)
+	$(shell pkg-config cairo --cflags)
 
 ifeq ($(shell uname),Darwin)
 	SHLIB_LINK_F = \
 		-L$(shell pg_config --libdir) \
 		-lgeos_c \
-		$(shell sfcgal-config --libs) \
-		$(shell gdal-config --libs) \
 		-lproj \
 		-ljson-c \
+		$(shell pkg-config cairo --libs) \
 		./tools/libs/libpostgis.a
 endif
 ifeq ($(shell uname),Linux)
 		SHLIB_LINK_F = \
 		-L$(shell pg_config --libdir) \
+		$(shell pkg-config cairo --libs) \
 		-lgeos_c \
-		$(shell sfcgal-config --libs) \
-		$(shell gdal-config --libs) \
 		-lproj \
 		-ljson-c \
 		-lpostgis 
