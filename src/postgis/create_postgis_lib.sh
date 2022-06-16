@@ -11,7 +11,8 @@ OS=`uname`
 CUR_DIR=$(cd `dirname $0`; pwd)
 mkdir $CUR_DIR/libs
 
-POSTGIS_SRC_PATH=$CUR_DIR/../../../../postgis
+POSTGIS_SRC_PATH=$CUR_DIR/../../../postgis
+echo $POSTGIS_SRC_PATH
 
 # macos 
 if test ${OS} = 'Darwin' ; then
@@ -20,7 +21,6 @@ fi
 
 # Linux
 if test ${OS} = 'Linux' ; then
-
   gcc -shared -o $CUR_DIR/libs/libpostgis.so ${POSTGIS_SRC_PATH}/liblwgeom/*.o ${POSTGIS_SRC_PATH}/libpgcommon/*.o ${POSTGIS_SRC_PATH}/deps/ryu/*.o
 fi
 
