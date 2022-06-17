@@ -4,6 +4,7 @@
 
 
 
+
 MapCanvas* lw_canvas_create(){
     MapCanvas* canvas = (MapCanvas*)malloc(sizeof(MapCanvas));
     canvas->surface = NULL;
