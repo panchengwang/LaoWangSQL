@@ -1,7 +1,8 @@
 #include "canvas.h"
 #include <string.h>
 #include <liblwgeom.h>
-
+#include <postgres.h>
+#include <fmgr.h>
 
 
 
@@ -20,6 +21,8 @@ void lw_canvas_destroy(MapCanvas *canvas){
 
 
 void lw_canvas_begin(MapCanvas *canvas){
+    lw_canvas_recalculate_parameters(canvas);
+
     if (canvas->format == CANVAS_JPG || 
         canvas->format == CANVAS_PNG){
         canvas->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, canvas->pointWidth, canvas->pointHeight);
@@ -85,5 +88,24 @@ void lw_canvas_recalculate_parameters(MapCanvas* canvas){
     canvas->maxx = canvas->centerx + canvas->pointWidth * 0.5 / canvas->scale;
     canvas->miny = canvas->centery - canvas->pointHeight * 0.5 / canvas->scale;
     canvas->maxy = canvas->centery + canvas->pointHeight * 0.5 / canvas->scale;
+
+    canvas->a = canvas->scale;
+    canvas->b = 0.0;
+    canvas->xoff = canvas->pointWidth * 0.5 - canvas->centerx * canvas->scale;
+    canvas->d = 0.0;
+    canvas->e = - canvas->scale;
+    canvas->yoff = canvas->pointHeight * 0.5 + canvas->centery * canvas->scale;
+
 }
 
+
+void lw_canvas_save_to_file(MapCanvas* canvas, const char* filename){
+    if(canvas->format == CANVAS_PNG){
+        lw_canvas_save_to_file_png(canvas, filename);
+    }
+}
+
+
+void lw_canvas_save_to_file_png(MapCanvas* canvas, const char* filename){
+    
+}

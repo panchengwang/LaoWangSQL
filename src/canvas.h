@@ -23,6 +23,7 @@ typedef struct {
     double pointsPerMilliMeter;
     double scale;
     int    format;                              // image or pdf
+    double a,b,c,xoff,d,e,f,yoff;
 } MapCanvas;
 
 
@@ -36,6 +37,8 @@ void lw_canvas_set_format(MapCanvas *canvas, const char* format);
 
 void lw_canvas_begin(MapCanvas *canvas);
 void lw_canvas_end(MapCanvas *canvas);
+void lw_canvas_save_to_file(MapCanvas* canvas, const char* filename);
+void lw_canvas_save_to_file_png(MapCanvas* canvas, const char* filename);
 
 void lw_canvas_recalculate_parameters(MapCanvas* canvas);
 
