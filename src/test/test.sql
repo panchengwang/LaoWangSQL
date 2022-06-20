@@ -11,3 +11,6 @@ select 'aaaa' || lw_map_create(
     72 / 25.4,
     'png'
 );
+
+
+select '0xffeeaaff'::MemAddress;
