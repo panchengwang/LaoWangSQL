@@ -25,6 +25,26 @@ $$
 language 'sql';
 
 
+-- create type MemAddress;
+
+CREATE or replace FUNCTION lw_memadd_in(cstring)
+    RETURNS MemAddress
+    AS '$libdir/laowangsql','lw_memadd_in'
+    LANGUAGE C IMMUTABLE STRICT;
+
+CREATE or replace FUNCTION lw_memadd_out(MemAddress)
+    RETURNS cstring
+    AS '$libdir/laowangsql','lw_memadd_out'
+    LANGUAGE C IMMUTABLE STRICT;
+
+
+CREATE TYPE MemAddress (
+   internallength = 8,
+   input = lw_memadd_in,
+   output = lw_memadd_out,
+   alignment = double
+);
+
 
 CREATE OR REPLACE FUNCTION lw_map_create(
   width float8,
