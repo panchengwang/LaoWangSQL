@@ -148,3 +148,16 @@ lw_map_end(PG_FUNCTION_ARGS)
     PG_RETURN_NULL();
 }
 
+
+
+PG_FUNCTION_INFO_V1(lw_map_save_to_file);
+Datum
+lw_map_save_to_file(PG_FUNCTION_ARGS)
+{
+    MemAddress   *addr = (MemAddress *) PG_GETARG_POINTER(0);
+    char* filename  = text_to_cstring(PG_GETARG_TEXT_P(1));
+    MapCanvas *canvas = (MapCanvas*)(addr->address);
+    lw_canvas_save_to_file(canvas, filename);
+    PG_RETURN_TEXT_P(cstring_to_text(filename));
+}
+

@@ -102,10 +102,16 @@ void lw_canvas_recalculate_parameters(MapCanvas* canvas){
 void lw_canvas_save_to_file(MapCanvas* canvas, const char* filename){
     if(canvas->format == CANVAS_PNG){
         lw_canvas_save_to_file_png(canvas, filename);
+    }else if(canvas->format == CANVAS_PDF){
+        elog(NOTICE,"Can not save to pdf file.");
+    }else if(canvas->format == CANVAS_JPG){
+        elog(NOTICE,"Can not save to jpg file.");
+    }else {
+        elog(NOTICE,"Invalid file format.");
     }
 }
 
 
 void lw_canvas_save_to_file_png(MapCanvas* canvas, const char* filename){
-    
+    cairo_surface_write_to_png(canvas->surface,filename);
 }

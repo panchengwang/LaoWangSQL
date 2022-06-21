@@ -144,3 +144,10 @@ CREATE OR REPLACE FUNCTION lw_map_end(
 	RETURNS MemAddress
 	AS '$libdir/laowangsql','lw_map_end'
 	LANGUAGE 'c' IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE OR REPLACE FUNCTION lw_map_save_to_file(
+  map MemAddress, varchar filename
+)
+	RETURNS MemAddress
+	AS '$libdir/laowangsql','lw_map_save_to_file'
+	LANGUAGE 'c' IMMUTABLE STRICT PARALLEL SAFE;

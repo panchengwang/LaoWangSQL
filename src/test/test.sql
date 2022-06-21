@@ -27,8 +27,11 @@ begin
     raise notice 'maxx: %',lw_map_get_maxx(map);
     raise notice 'maxy: %',lw_map_get_maxy(map);
     raise notice 'scale: %',lw_map_get_scale(map);
+    
+    perform lw_map_end(map);
 
     perform lw_map_destroy(map);
+    
     return 'ok';
 end;
 $$ language 'plpgsql';
