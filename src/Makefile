@@ -38,6 +38,7 @@ ifeq ($(shell uname),Linux)
 		SHLIB_LINK_F = \
 		-L$(shell pg_config --libdir) \
 		$(shell pkg-config cairo --libs) \
+		$(shell sfcgal-config --libs) \
 		-lgeos_c \
 		-lproj \
 		-ljson-c \

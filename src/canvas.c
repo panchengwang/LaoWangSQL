@@ -5,7 +5,6 @@
 #include <fmgr.h>
 
 
-
 MapCanvas* lw_canvas_create(){
     MapCanvas* canvas = (MapCanvas*)malloc(sizeof(MapCanvas));
     canvas->surface = NULL;
@@ -15,14 +14,23 @@ MapCanvas* lw_canvas_create(){
 
 
 void lw_canvas_destroy(MapCanvas *canvas){
-    lw_canvas_end(canvas);
+    if(canvas->cairo != NULL){
+        cairo_destroy(canvas->cairo);
+        canvas->cairo = NULL;
+    }
+    
+    if (canvas->surface != NULL){
+        cairo_surface_destroy(canvas->surface);
+        canvas->surface = NULL;
+    }
+    free(canvas);
 }
 
 
 
 void lw_canvas_begin(MapCanvas *canvas){
     lw_canvas_recalculate_parameters(canvas);
-
+    
     if (canvas->format == CANVAS_JPG || 
         canvas->format == CANVAS_PNG){
         canvas->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, canvas->pointWidth, canvas->pointHeight);
@@ -34,15 +42,8 @@ void lw_canvas_begin(MapCanvas *canvas){
 
 
 void lw_canvas_end(MapCanvas *canvas){
-    if(canvas->cairo != NULL){
-        cairo_destroy(canvas->cairo);
-        canvas->cairo = NULL;
-    }
-    
-    if (canvas->surface != NULL){
-        cairo_surface_destroy(canvas->surface);
-        canvas->surface = NULL;
-    }
+    cairo_surface_flush(canvas->surface);
+    // cairo_surface_finish(canvas->surface);
 }
 
 
@@ -81,8 +82,8 @@ void lw_canvas_recalculate_parameters(MapCanvas* canvas){
     double xscale, yscale;
     canvas->pointWidth = canvas->width * canvas->pointsPerMilliMeter;
     canvas->pointHeight = canvas->height * canvas->pointsPerMilliMeter;
-    xscale = canvas->width / (canvas->maxx - canvas->minx);
-    yscale = canvas->height / (canvas->maxy - canvas->miny);
+    xscale = canvas->pointWidth / (canvas->maxx - canvas->minx);
+    yscale = canvas->pointHeight / (canvas->maxy - canvas->miny);
     canvas->scale = xscale > yscale ? yscale : xscale;
     canvas->minx = canvas->centerx - canvas->pointWidth * 0.5 / canvas->scale;
     canvas->maxx = canvas->centerx + canvas->pointWidth * 0.5 / canvas->scale;
@@ -96,12 +97,20 @@ void lw_canvas_recalculate_parameters(MapCanvas* canvas){
     canvas->e = - canvas->scale;
     canvas->yoff = canvas->pointHeight * 0.5 + canvas->centery * canvas->scale;
 
+    // elog(NOTICE, "a: %lf, b: %lf, xoff: %lf,d: %lf, e: %lf, yoff: %f", 
+    //     canvas->a, 
+    //     canvas->b,
+    //     canvas->xoff,
+    //     canvas->d,
+    //     canvas->e,
+    //     canvas->yoff);
 }
 
 
 void lw_canvas_save_to_file(MapCanvas* canvas, const char* filename){
+    
     if(canvas->format == CANVAS_PNG){
-        lw_canvas_save_to_file_png(canvas, filename);
+        lw_canvas_save_to_file_png(canvas, filename);elog(NOTICE,"%s",filename);
     }else if(canvas->format == CANVAS_PDF){
         elog(NOTICE,"Can not save to pdf file.");
     }else if(canvas->format == CANVAS_JPG){
@@ -112,6 +121,102 @@ void lw_canvas_save_to_file(MapCanvas* canvas, const char* filename){
 }
 
 
+
+
 void lw_canvas_save_to_file_png(MapCanvas* canvas, const char* filename){
     cairo_surface_write_to_png(canvas->surface,filename);
 }
+
+
+
+
+void lw_canvas_add_geometry(MapCanvas* canvas, LWGEOM* geom){
+    int type;
+    int i=0;
+
+    
+    type = geom->type;
+    switch (type)
+    {
+    case POINTTYPE:
+        lw_canvas_add_point(canvas,(LWPOINT*)geom);
+        break;
+    case LINETYPE:
+        lw_canvas_add_linestring(canvas,(LWLINE*)geom);
+        break;
+    case POLYGONTYPE:
+        lw_canvas_add_polygon(canvas, (LWPOLY*)geom);
+    default:
+        {
+            if( lwgeom_is_collection(geom) )
+			{
+				LWCOLLECTION *c = (LWCOLLECTION*)geom;
+				for( i = 0; i < c->ngeoms; i++ )
+				{
+					lw_canvas_add_geometry(canvas,c->geoms[i]);
+				}
+			}
+			else
+			{
+				elog(NOTICE,"Invalid geometry!");
+			}
+        }
+        break;
+    }
+}
+
+
+void lw_canvas_add_polygon(MapCanvas* canvas, LWPOLY* geom){
+
+}
+
+
+void lw_canvas_add_linestring(MapCanvas* canvas, LWLINE* geom){
+    int npoints = geom->points->npoints;
+    int i=0;
+
+    cairo_set_source_rgba(canvas->cairo, 0.0,0.0,0.0,1);
+    cairo_set_line_width(canvas->cairo,1.0);
+    POINT2D pt = getPoint2d(geom->points,i);
+    cairo_move_to(canvas->cairo,pt.x,pt.y);
+    for(i=1; i<npoints; i++){
+        pt = getPoint2d(geom->points, i);
+        elog(NOTICE,"%lf,%lf",pt.x,pt.y);
+        cairo_line_to(canvas->cairo, pt.x, pt.y);
+    }
+    cairo_stroke(canvas->cairo);
+
+}
+
+void lw_canvas_add_point(MapCanvas* canvas, LWPOINT* geom){
+    cairo_set_source_rgba(canvas->cairo, 1.0, 0.5, 0.5,0.6);
+    cairo_set_line_width(canvas->cairo,1.0);
+    POINT2D pt = getPoint2d(geom->point,0);
+    cairo_arc(canvas->cairo,pt.x, pt.y,5,0,2*M_PI);
+    cairo_fill(canvas->cairo);
+    cairo_set_source_rgba(canvas->cairo, 0., 0., 0.,1.0);
+    cairo_arc(canvas->cairo,pt.x, pt.y,5,0,2*M_PI);
+    cairo_stroke(canvas->cairo);
+}
+
+
+void lw_canvas_affine(MapCanvas* canvas, LWGEOM* lwgeom){
+	AFFINE affine;
+
+	affine.afac = canvas->a;
+	affine.bfac = canvas->b;
+	affine.dfac = canvas->d;
+	affine.efac = canvas->e;
+	affine.xoff = canvas->xoff;
+	affine.yoff = canvas->yoff;
+
+	lwgeom_affine(lwgeom, &affine);
+
+	/* COMPUTE_BBOX TAINTING */
+	if (lwgeom->bbox)
+	{
+		lwgeom_refresh_bbox(lwgeom);
+	}
+}
+
+

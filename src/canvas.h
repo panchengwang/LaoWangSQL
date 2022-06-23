@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <cairo.h>
 #include <math.h>
+#include <liblwgeom.h>
 
 #define CANVAS_PNG 1
 #define CANVAS_JPG 2
@@ -42,5 +43,9 @@ void lw_canvas_save_to_file_png(MapCanvas* canvas, const char* filename);
 
 void lw_canvas_recalculate_parameters(MapCanvas* canvas);
 
+void lw_canvas_affine(MapCanvas* canvas, LWGEOM* lwgeom);
+void lw_canvas_add_geometry(MapCanvas* canvas, LWGEOM* lwgeom);
+
+void lw_canvas_add_point(MapCanvas* canvas, LWPOINT* geom);
 #endif
 

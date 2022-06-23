@@ -2,7 +2,8 @@
 #include <utils/builtins.h>
 #include <canvas.h>
 #include <memadd.h>
-
+#include <liblwgeom.h>
+#include <lwgeom_pg.h>
 
 PG_MODULE_MAGIC;
 
@@ -161,3 +162,18 @@ lw_map_save_to_file(PG_FUNCTION_ARGS)
     PG_RETURN_TEXT_P(cstring_to_text(filename));
 }
 
+
+
+PG_FUNCTION_INFO_V1(lw_map_add_geometry);
+Datum lw_map_add_geometry(PG_FUNCTION_ARGS)
+{
+    MemAddress   *addr = (MemAddress *) PG_GETARG_POINTER(0);
+    MapCanvas *canvas = (MapCanvas*)(addr->address);
+	GSERIALIZED *geom = (GSERIALIZED*) PG_GETARG_GSERIALIZED_P_COPY(1);
+	LWGEOM *lwgeom = lwgeom_from_gserialized(geom);
+    lw_canvas_affine(canvas,lwgeom);
+	lw_canvas_add_geometry(canvas,lwgeom);
+    lwgeom_free(lwgeom);
+	PG_FREE_IF_COPY(geom, 1);
+    PG_RETURN_POINTER(addr);
+}

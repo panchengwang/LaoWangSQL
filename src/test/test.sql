@@ -1,7 +1,7 @@
 create extension postgis;
 create extension postgis_topology;
 create extension laowangsql;
-
+create extension "uuid-ossp";
 
 select laowang_info();
 
@@ -14,7 +14,7 @@ declare
 begin
     map := lw_map_create(
         800 * 25.4 / 72.0, 600 * 25.4 /72.0,
-        -180,-90,180,90,
+        108,24,115,30.2,
         72 / 25.4,
         'png'
     );
@@ -27,9 +27,10 @@ begin
     raise notice 'maxx: %',lw_map_get_maxx(map);
     raise notice 'maxy: %',lw_map_get_maxy(map);
     raise notice 'scale: %',lw_map_get_scale(map);
-    
+    perform lw_map_add_geometry(map,geom) from town;
+    perform lw_map_add_geometry(map,geom) from railway;
     perform lw_map_end(map);
-
+    perform lw_map_save_to_file(map,'/tmp/' || lw_uuid() || '.png');
     perform lw_map_destroy(map);
     
     return 'ok';

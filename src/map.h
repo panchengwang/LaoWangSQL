@@ -15,6 +15,6 @@ Datum lw_map_get_miny(PG_FUNCTION_ARGS);
 Datum lw_map_get_maxx(PG_FUNCTION_ARGS);
 Datum lw_map_get_maxy(PG_FUNCTION_ARGS);
 Datum lw_map_get_scale(PG_FUNCTION_ARGS);
-
+Datum lw_map_add_geometry(PG_FUNCTION_ARGS);
 
 #endif

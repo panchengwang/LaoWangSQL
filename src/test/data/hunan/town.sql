@@ -24,7 +24,7 @@ SET default_table_access_method = heap;
 -- Name: hunan_town; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.hunan_town (
+CREATE TABLE public.town (
     gid integer,
     area numeric,
     perimeter numeric,
@@ -44,7 +44,7 @@ CREATE TABLE public.hunan_town (
 -- Data for Name: hunan_town; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.hunan_town (gid, area, perimeter, cntypt_, cntypt_id, name, pyname, class, id, pn, adcode93, geom) FROM stdin;
+COPY public.town (gid, area, perimeter, cntypt_, cntypt_id, name, pyname, class, id, pn, adcode93, geom) FROM stdin;
 1347	0.000000000000000	0.000000000000000	1772	1402	澧县	Li Xian	AI	2371	1	430723	0101000020E61000008A592F8672F05B4010786000E1A33D40
 1348	0.000000000000000	0.000000000000000	1773	1403	津市市	Jinshi Shi	AH	2372	1	430781	0101000020E610000055302AA913F85B40B41F2922C3A23D40
 1354	0.000000000000000	0.000000000000000	1781	1409	石门县	Shimen Xian	AI	2378	1	430726	0101000020E610000059DDEA39E9D75B402C4A09C1AA963D40

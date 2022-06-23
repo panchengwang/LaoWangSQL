@@ -146,8 +146,21 @@ CREATE OR REPLACE FUNCTION lw_map_end(
 	LANGUAGE 'c' IMMUTABLE STRICT PARALLEL SAFE;
 
 CREATE OR REPLACE FUNCTION lw_map_save_to_file(
-  map MemAddress, varchar filename
+  map MemAddress, filename varchar
 )
 	RETURNS MemAddress
 	AS '$libdir/laowangsql','lw_map_save_to_file'
+	LANGUAGE 'c' IMMUTABLE STRICT PARALLEL SAFE;
+
+
+create or replace function lw_uuid() returns varchar as 
+$$
+	select replace(uuid_generate_v1()::text,'-','');
+$$ language 'sql';
+
+
+create or replace function lw_map_add_geometry(
+	map MemAddress, g geometry
+) returns MemAddress 
+	AS '$libdir/laowangsql','lw_map_add_geometry'
 	LANGUAGE 'c' IMMUTABLE STRICT PARALLEL SAFE;
