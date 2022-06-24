@@ -47,5 +47,9 @@ void lw_canvas_affine(MapCanvas* canvas, LWGEOM* lwgeom);
 void lw_canvas_add_geometry(MapCanvas* canvas, LWGEOM* lwgeom);
 
 void lw_canvas_add_point(MapCanvas* canvas, LWPOINT* geom);
+void lw_canvas_add_linestring(MapCanvas* canvas, LWLINE* geom);
+void lw_canvas_add_polygon(MapCanvas* canvas, LWPOLY* geom);
+void lw_canvas_fill_polygon(MapCanvas* canvas, LWPOLY* geom);
+void lw_canvas_draw_polygon_border(MapCanvas* canvas, LWPOLY* geom);
 #endif
 

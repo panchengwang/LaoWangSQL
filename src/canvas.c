@@ -146,6 +146,7 @@ void lw_canvas_add_geometry(MapCanvas* canvas, LWGEOM* geom){
         break;
     case POLYGONTYPE:
         lw_canvas_add_polygon(canvas, (LWPOLY*)geom);
+        break;
     default:
         {
             if( lwgeom_is_collection(geom) )
@@ -166,9 +167,69 @@ void lw_canvas_add_geometry(MapCanvas* canvas, LWGEOM* geom){
 }
 
 
-void lw_canvas_add_polygon(MapCanvas* canvas, LWPOLY* geom){
+void lw_canvas_fill_polygon(MapCanvas* canvas, LWPOLY* geom){
+    int nrings = geom->nrings;
+    int i=0,j=0,k=0;
+    int count = 0; 
+    double *x, *y;
+    for(i=0; i<nrings; i++){
+        POINTARRAY *ring = geom->rings[i];
+        count += ring->npoints;
+    }
+    x = (double*)malloc(sizeof(double) * count);
+    y = (double*)malloc(sizeof(double) * count);
 
+    POINT2D pt;
+    for(i=0; i<nrings; i++){
+        POINTARRAY *ring = geom->rings[i];
+        for(j=0; j<ring->npoints; j++){
+            pt = getPoint2d(ring,j);
+            x[k] = pt.x;
+            y[k] = pt.y;
+            k ++;
+        }
+    }
+
+    cairo_set_source_rgba(canvas->cairo, 0.0,1.0,0.0,0.5);
+    cairo_move_to(canvas->cairo, x[0],y[0]);
+    for (k=1; k<count; k++){
+        cairo_line_to(canvas->cairo, x[k],y[k]);
+    }
+    cairo_fill(canvas->cairo);
+    free(x);
+    free(y);
 }
+
+
+
+void lw_canvas_draw_polygon_border(MapCanvas* canvas, LWPOLY* geom){
+    int i,j;
+    POINT2D pt;
+    cairo_set_source_rgba(canvas->cairo, 0.0,0.0,0.0,0.5);
+    cairo_set_line_width(canvas->cairo, 1.0);
+    for(i=0; i<geom->nrings; i++){
+        POINTARRAY *ring = geom->rings[i];
+        pt = getPoint2d(ring,0);
+        cairo_move_to(canvas->cairo, pt.x, pt.y);
+
+        for(j=1; j<ring->npoints; j++){
+            pt = getPoint2d(ring,j);
+            cairo_line_to(canvas->cairo, pt.x, pt.y);
+        }
+        cairo_close_path(canvas->cairo);
+        cairo_stroke(canvas->cairo);
+    }
+}
+
+
+
+
+void lw_canvas_add_polygon(MapCanvas* canvas, LWPOLY* geom){
+    lw_canvas_fill_polygon(canvas, geom);
+    lw_canvas_draw_polygon_border(canvas, geom);
+}
+
+
 
 
 void lw_canvas_add_linestring(MapCanvas* canvas, LWLINE* geom){
@@ -181,7 +242,6 @@ void lw_canvas_add_linestring(MapCanvas* canvas, LWLINE* geom){
     cairo_move_to(canvas->cairo,pt.x,pt.y);
     for(i=1; i<npoints; i++){
         pt = getPoint2d(geom->points, i);
-        elog(NOTICE,"%lf,%lf",pt.x,pt.y);
         cairo_line_to(canvas->cairo, pt.x, pt.y);
     }
     cairo_stroke(canvas->cairo);

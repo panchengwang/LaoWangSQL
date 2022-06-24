@@ -4,7 +4,8 @@ MODULE_big = laowangsql
 OBJS = 	map.o \
 		canvas.o \
 		memadd.o \
-		version.o 
+		version.o \
+		symbol.o
 
 EXTENSION = laowangsql
 DATA = laowangsql--1.0.sql
