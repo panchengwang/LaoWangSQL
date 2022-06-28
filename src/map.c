@@ -177,3 +177,4 @@ Datum lw_map_add_geometry(PG_FUNCTION_ARGS)
 	PG_FREE_IF_COPY(geom, 1);
     PG_RETURN_POINTER(addr);
 }
+
